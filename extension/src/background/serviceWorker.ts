@@ -1,0 +1,33 @@
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message.action === 'ping') {
+    sendResponse({ ok: true })
+  }
+  return true
+})
+
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command === 'start-dictation') {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
+    if (tab?.id) {
+      chrome.tabs.sendMessage(tab.id, { action: 'start-dictation' }).catch(() => {
+        // Content script might not be loaded yet
+      })
+    }
+  }
+})
+
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    id: 'voxa-dictate',
+    title: 'Type using Voxa',
+    contexts: ['editable'],
+  })
+})
+
+chrome.contextMenus.onClicked.addListener(async (_info, tab) => {
+  if (tab?.id) {
+    chrome.tabs.sendMessage(tab.id, { action: 'start-dictation' }).catch(() => {
+      // Content script might not be loaded yet
+    })
+  }
+})

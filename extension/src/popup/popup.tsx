@@ -1,10 +1,25 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createRoot } from 'react-dom/client'
 import './popup.css'
 
 function Popup() {
   const [enabled, setEnabled] = useState(true)
   const [language, setLanguage] = useState('en')
+  const [languageMenuOpen, setLanguageMenuOpen] = useState(false)
+  const languageMenuRef = useRef<HTMLDivElement>(null)
+
+  const languages = [
+    { value: 'en', label: 'English' },
+    { value: 'es', label: 'Spanish' },
+    { value: 'fr', label: 'French' },
+    { value: 'de', label: 'German' },
+    { value: 'it', label: 'Italian' },
+    { value: 'pt', label: 'Portuguese' },
+    { value: 'nl', label: 'Dutch' },
+    { value: 'ja', label: 'Japanese' },
+    { value: 'ko', label: 'Korean' },
+    { value: 'zh', label: 'Chinese' },
+  ]
 
   useEffect(() => {
     chrome.storage.sync.get(['voxaEnabled', 'voxaLanguage'], (result) => {
@@ -13,15 +28,29 @@ function Popup() {
     })
   }, [])
 
+  useEffect(() => {
+    const handleDocumentClick = (event: MouseEvent) => {
+      if (languageMenuRef.current && !languageMenuRef.current.contains(event.target as Node)) {
+        setLanguageMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleDocumentClick)
+    return () => document.removeEventListener('mousedown', handleDocumentClick)
+  }, [])
+
   const toggleEnabled = () => {
     const newValue = !enabled
     setEnabled(newValue)
     chrome.storage.sync.set({ voxaEnabled: newValue })
   }
 
-  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setLanguage(e.target.value)
-    chrome.storage.sync.set({ voxaLanguage: e.target.value })
+  const selectedLanguage = languages.find(item => item.value === language) || languages[0]
+
+  const selectLanguage = (value: string) => {
+    setLanguage(value)
+    setLanguageMenuOpen(false)
+    chrome.storage.sync.set({ voxaLanguage: value })
   }
 
   return (
@@ -38,18 +67,34 @@ function Popup() {
 
       <div className="popup-section">
         <label className="popup-label">Language</label>
-        <select value={language} onChange={handleLanguageChange} className="popup-select">
-          <option value="en">English</option>
-          <option value="es">Spanish</option>
-          <option value="fr">French</option>
-          <option value="de">German</option>
-          <option value="it">Italian</option>
-          <option value="pt">Portuguese</option>
-          <option value="nl">Dutch</option>
-          <option value="ja">Japanese</option>
-          <option value="ko">Korean</option>
-          <option value="zh">Chinese</option>
-        </select>
+        <div className="popup-select-wrapper" ref={languageMenuRef}>
+          <button
+            type="button"
+            className="popup-select"
+            aria-haspopup="listbox"
+            aria-expanded={languageMenuOpen}
+            onClick={() => setLanguageMenuOpen(open => !open)}
+          >
+            <span>{selectedLanguage.label}</span>
+            <span className="popup-select-arrow" aria-hidden="true">⌄</span>
+          </button>
+          {languageMenuOpen && (
+            <div className="popup-language-menu" role="listbox" aria-label="Language">
+              {languages.map(item => (
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={item.value === language}
+                  className={`popup-language-option${item.value === language ? ' selected' : ''}`}
+                  key={item.value}
+                  onClick={() => selectLanguage(item.value)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="popup-section">

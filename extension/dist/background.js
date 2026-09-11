@@ -23,9 +23,9 @@
       contexts: ["editable"]
     });
   });
-  chrome.contextMenus.onClicked.addListener(async (_info, tab) => {
+  chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     if (tab?.id) {
-      chrome.tabs.sendMessage(tab.id, { action: "start-dictation" }).catch(() => {
+      chrome.tabs.sendMessage(tab.id, { action: "start-dictation" }, { frameId: info.frameId }).catch(() => {
       });
     }
   });

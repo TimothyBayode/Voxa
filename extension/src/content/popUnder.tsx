@@ -5,10 +5,10 @@ interface PopUnderProps {
   state: PopUnderState
   errorMessage?: string
   targetRect: DOMRect | null
-  onStopDictation: () => void
+  onDictationAction: () => void
 }
 
-export function PopUnder({ state, errorMessage, targetRect, onStopDictation }: PopUnderProps) {
+export function PopUnder({ state, errorMessage, targetRect, onDictationAction }: PopUnderProps) {
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
   const popRef = useRef<HTMLDivElement>(null)
 
@@ -34,20 +34,6 @@ export function PopUnder({ state, errorMessage, targetRect, onStopDictation }: P
     setPosition({ top, left })
   }, [targetRect, state])
 
-  useEffect(() => {
-    if (state === 'listening') {
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.altKey && e.shiftKey && e.key === 'd') {
-          e.preventDefault()
-          e.stopPropagation()
-          onStopDictation()
-        }
-      }
-      document.addEventListener('keydown', handleKeyDown, true)
-      return () => document.removeEventListener('keydown', handleKeyDown, true)
-    }
-  }, [state, onStopDictation])
-
   if (!position) return null
 
   const getStateContent = () => {
@@ -57,7 +43,7 @@ export function PopUnder({ state, errorMessage, targetRect, onStopDictation }: P
           <div className="pop-under-content">
             <span className="pop-under-icon">🎙</span>
             <div className="pop-under-text">
-              <span className="pop-under-label">Dictate with Voxa</span>
+              <span className="pop-under-label">Dictate text with Voxa</span>
               <span className="pop-under-shortcut">Alt + Shift + D</span>
             </div>
           </div>
@@ -112,6 +98,15 @@ export function PopUnder({ state, errorMessage, targetRect, onStopDictation }: P
     <div
       ref={popRef}
       className="pop-under"
+      role="button"
+      tabIndex={0}
+      onClick={onDictationAction}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onDictationAction()
+        }
+      }}
       style={{
         top: `${position.top}px`,
         left: `${position.left}px`,

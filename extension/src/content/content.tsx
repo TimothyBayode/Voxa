@@ -19,7 +19,7 @@ const POP_UNDER_CSS = `
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 13px;
   color: #1f2937;
-  cursor: default;
+  cursor: pointer;
   user-select: none;
   transition: opacity 0.15s ease, transform 0.15s ease;
   overflow: hidden;
@@ -213,8 +213,12 @@ function renderPopUnder() {
       state: dictationState.state,
       errorMessage: dictationState.errorMessage,
       targetRect: dictationState.targetElement?.getBoundingClientRect() || null,
-      onStopDictation: async () => {
-        await stopDictation()
+      onDictationAction: async () => {
+        if (dictationState.state === 'listening') {
+          await stopDictation()
+        } else if (dictationState.state === 'idle') {
+          await startDictationFlow()
+        }
       },
     })
   )
@@ -298,6 +302,24 @@ function getErrorMessage(error: any): string {
 }
 
 function init() {
+  const handleShortcut = (event: KeyboardEvent) => {
+    if (!event.altKey || !event.shiftKey || event.key.toLowerCase() !== 'd') return
+
+    const active = getActiveEditableElement()
+    if (!active && dictationState.state === 'hidden') return
+
+    event.preventDefault()
+    event.stopPropagation()
+
+    if (dictationState.state === 'listening') {
+      void stopDictation()
+    } else {
+      void startDictationFlow(active || undefined)
+    }
+  }
+
+  document.addEventListener('keydown', handleShortcut, true)
+
   setupFocusDetection(
     (element) => {
       if (dictationState.state === 'hidden') {

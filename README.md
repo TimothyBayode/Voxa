@@ -2,7 +2,7 @@
 
 **Turn every text box into a microphone.**
 
-Voxa is a Chrome extension that brings voice dictation to every text input on the web. Focus any text field and press `Ctrl + Shift + D` to start dictating with AssemblyAI's real-time transcription API.
+Voxa is a Chrome extension that brings voice dictation to every text input on the web. Focus any text field and press `Alt + Shift + D` to start dictating with AssemblyAI's real-time transcription API.
 
 ---
 
@@ -11,7 +11,7 @@ Voxa is a Chrome extension that brings voice dictation to every text input on th
 - Dictate into any text input, textarea, or contenteditable element
 - Real-time transcription via AssemblyAI Dictation API
 - Minimal, unobtrusive pop-under UI
-- Keyboard shortcut: `Ctrl + Shift + D`
+- Keyboard shortcut: `Alt + Shift + D`
 - Works with modern JavaScript applications (React, Vue, etc.)
 - Lightweight and privacy-focused
 
@@ -125,10 +125,10 @@ npm run dev
 
 1. Focus any text input, textarea, or contenteditable element on a webpage
 2. A small "Dictate with Voxa" pop-under appears below the field
-3. Press `Ctrl + Shift + D` (or click the pop-under)
+3. Press `Alt + Shift + D` (or click the pop-under)
 4. Allow microphone access when prompted (first time only)
 5. Speak naturally
-6. Press `Ctrl + Shift + D` again to stop
+6. Press `Alt + Shift + D` again to stop
 7. Your transcript appears in the text field
 
 ---

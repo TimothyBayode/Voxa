@@ -40,6 +40,15 @@ const POP_UNDER_CSS = `
   text-align: center;
 }
 
+.pop-under-logo {
+  display: block;
+  width: 22px;
+  height: 22px;
+  margin: 0 auto;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
 .pop-under-text {
   display: flex;
   flex-direction: column;
@@ -310,7 +319,14 @@ function getErrorMessage(error: any): string {
 }
 
 async function init() {
-  let enabled = await isVoxaEnabled()
+  let enabled = true
+  try {
+    enabled = await isVoxaEnabled()
+  } catch {
+    // Storage unavailable (e.g. stale context) — default to enabled
+  }
+
+  console.info(`[Voxa] Content script ready (enabled: ${enabled})`)
 
   chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName !== 'local' || !changes.voxaEnabled) return
@@ -344,6 +360,10 @@ async function init() {
         dictationState.targetElement = element
         dictationState.state = 'idle'
         showPopUnder()
+        renderPopUnder()
+      } else if (dictationState.state === 'idle' && dictationState.targetElement !== element) {
+        // Moving directly between fields — re-anchor the pop-under to the new field
+        dictationState.targetElement = element
         renderPopUnder()
       }
     },

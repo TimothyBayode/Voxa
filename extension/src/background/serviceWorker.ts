@@ -13,16 +13,42 @@ async function isEnabled(): Promise<boolean> {
 const ICONS_ENABLED = { 16: 'icons/icon16.png', 48: 'icons/icon48.png' }
 const ICONS_DISABLED = { 16: 'icons/icon16-disabled.png', 48: 'icons/icon48-disabled.png' }
 
-async function applyActionIcon(): Promise<void> {
-  const { voxaEnabled } = await chrome.storage.local.get({ voxaEnabled: true })
+async function applyActionIcon(voxaEnabled: boolean): Promise<void> {
   await chrome.action.setIcon({ path: voxaEnabled ? ICONS_ENABLED : ICONS_DISABLED })
 }
 
-applyActionIcon()
+const CONTEXT_MENU_ID = 'voxa-dictate'
+
+function createContextMenu(): void {
+  chrome.contextMenus.create(
+    {
+      id: CONTEXT_MENU_ID,
+      title: 'Dictate with Voxa',
+      contexts: ['editable'],
+    },
+    () => void chrome.runtime.lastError
+  )
+}
+
+function removeContextMenu(): void {
+  chrome.contextMenus.remove(CONTEXT_MENU_ID, () => void chrome.runtime.lastError)
+}
+
+async function syncEnabledState(): Promise<void> {
+  const { voxaEnabled } = await chrome.storage.local.get({ voxaEnabled: true })
+  await applyActionIcon(voxaEnabled)
+  if (voxaEnabled) {
+    createContextMenu()
+  } else {
+    removeContextMenu()
+  }
+}
+
+syncEnabledState()
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local' && changes.voxaEnabled) {
-    void applyActionIcon()
+    void syncEnabledState()
   }
 })
 
@@ -36,14 +62,6 @@ chrome.commands.onCommand.addListener(async (command) => {
       })
     }
   }
-})
-
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.create({
-    id: 'voxa-dictate',
-    title: 'Dictate with Voxa',
-    contexts: ['editable'],
-  })
 })
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {

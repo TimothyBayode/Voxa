@@ -14,13 +14,22 @@ export function setupFocusDetection(
     }
   }
 
-  const handleFocusOut = (_event: Event) => {
+  const handleFocusOut = (event: Event) => {
+    const relatedTarget = (event as FocusEvent).relatedTarget as Node | null
     requestAnimationFrame(() => {
       const active = document.activeElement
-      if (!active || !isEditableElement(active)) {
-        currentElement = null
-        onElementBlurred()
+      if (active && isEditableElement(active)) {
+        return
       }
+
+      // Don't hide when focus moved into the Voxa pop-under (clicking it starts dictation)
+      const host = document.getElementById('voxa-pop-under-host')
+      if (host && (active === host || (relatedTarget && (relatedTarget === host || host.contains(relatedTarget))))) {
+        return
+      }
+
+      currentElement = null
+      onElementBlurred()
     })
   }
 

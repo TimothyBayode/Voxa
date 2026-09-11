@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import type { PopUnderState } from '../components/types'
+import voxaLogoUrl from '../assets/logo.png'
 
 interface PopUnderProps {
   state: PopUnderState
@@ -53,10 +54,12 @@ export function PopUnder({ state, errorMessage, targetRect, targetElement, onDic
       case 'idle':
         return (
           <div className="pop-under-content">
-            <span className="pop-under-icon">🎙</span>
+            <span className="pop-under-icon">
+              <img src={voxaLogoUrl} alt="Voxa" className="pop-under-logo" draggable={false} />
+            </span>
             <div className="pop-under-text">
-              <span className="pop-under-label">Dictate text with Voxa</span>
-              <span className="pop-under-shortcut">Alt + Shift + D</span>
+              <span className="pop-under-label">Click to dictate with Voxa</span>
+              <span className="pop-under-shortcut">or use Alt + Shift + D</span>
             </div>
           </div>
         )

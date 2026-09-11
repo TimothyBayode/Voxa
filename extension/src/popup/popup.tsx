@@ -1,10 +1,25 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { createRoot } from 'react-dom/client'
 import './popup.css'
+
+const LANGUAGES = [
+  { value: 'en', label: 'English' },
+  { value: 'es', label: 'Spanish' },
+  { value: 'fr', label: 'French' },
+  { value: 'de', label: 'German' },
+  { value: 'it', label: 'Italian' },
+  { value: 'pt', label: 'Portuguese' },
+  { value: 'nl', label: 'Dutch' },
+  { value: 'ja', label: 'Japanese' },
+  { value: 'ko', label: 'Korean' },
+  { value: 'zh', label: 'Chinese' },
+]
 
 function Popup() {
   const [enabled, setEnabled] = useState(true)
   const [language, setLanguage] = useState('en')
+  const [menuOpen, setMenuOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     chrome.storage.local.get(['voxaEnabled', 'voxaLanguage'], (result) => {
@@ -13,16 +28,48 @@ function Popup() {
     })
   }, [])
 
+  useEffect(() => {
+    const handleDocumentMouseDown = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleDocumentMouseDown)
+    return () => document.removeEventListener('mousedown', handleDocumentMouseDown)
+  }, [])
+
   const toggleEnabled = () => {
     const newValue = !enabled
     setEnabled(newValue)
     chrome.storage.local.set({ voxaEnabled: newValue })
   }
 
-  const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setLanguage(event.target.value)
-    chrome.storage.local.set({ voxaLanguage: event.target.value })
+  const selectLanguage = (value: string) => {
+    setLanguage(value)
+    setMenuOpen(false)
+    chrome.storage.local.set({ voxaLanguage: value })
   }
+
+  const handleTriggerKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (!menuOpen) {
+      if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault()
+        setMenuOpen(true)
+      }
+      return
+    }
+    const currentIndex = LANGUAGES.findIndex((item) => item.value === language)
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault()
+      const nextIndex = (currentIndex + (event.key === 'ArrowDown' ? 1 : -1) + LANGUAGES.length) % LANGUAGES.length
+      selectLanguage(LANGUAGES[nextIndex].value)
+    } else if (event.key === 'Escape') {
+      event.preventDefault()
+      setMenuOpen(false)
+    }
+  }
+
+  const selectedLanguage = LANGUAGES.find((item) => item.value === language) || LANGUAGES[0]
 
   return (
     <div className="popup">
@@ -38,18 +85,48 @@ function Popup() {
 
       <div className="popup-section">
         <label className="popup-label">Language</label>
-        <select value={language} onChange={handleLanguageChange} className="popup-select">
-          <option value="en">English</option>
-          <option value="es">Spanish</option>
-          <option value="fr">French</option>
-          <option value="de">German</option>
-          <option value="it">Italian</option>
-          <option value="pt">Portuguese</option>
-          <option value="nl">Dutch</option>
-          <option value="ja">Japanese</option>
-          <option value="ko">Korean</option>
-          <option value="zh">Chinese</option>
-        </select>
+        <div className="popup-select-wrapper" ref={dropdownRef}>
+          <button
+            type="button"
+            className="popup-select"
+            aria-haspopup="listbox"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((open) => !open)}
+            onKeyDown={handleTriggerKeyDown}
+          >
+            <span>{selectedLanguage.label}</span>
+            <svg
+              className="popup-select-arrow"
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          {menuOpen && (
+            <div className="popup-language-menu" role="listbox" aria-label="Language">
+              {LANGUAGES.map((item) => (
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={item.value === language}
+                  className={`popup-language-option${item.value === language ? ' selected' : ''}`}
+                  key={item.value}
+                  onClick={() => selectLanguage(item.value)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="popup-section">
@@ -72,7 +149,16 @@ function Popup() {
       </div>
 
       <div className="popup-footer">
-        <a href="#" className="popup-link" onClick={(e) => e.preventDefault()}>
+        <a
+          href="https://github.com/TimothyBayode/Voxa"
+          className="popup-link"
+          target="_blank"
+          rel="noreferrer"
+          onClick={(e) => {
+            e.preventDefault()
+            chrome.tabs.create({ url: 'https://github.com/TimothyBayode/Voxa' })
+          }}
+        >
           Documentation
         </a>
       </div>

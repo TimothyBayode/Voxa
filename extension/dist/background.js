@@ -11,6 +11,18 @@
     const result = await chrome.storage.local.get({ voxaEnabled: true });
     return result.voxaEnabled === true;
   }
+  var ICONS_ENABLED = { 16: "icons/icon16.png", 48: "icons/icon48.png" };
+  var ICONS_DISABLED = { 16: "icons/icon16-disabled.png", 48: "icons/icon48-disabled.png" };
+  async function applyActionIcon() {
+    const { voxaEnabled } = await chrome.storage.local.get({ voxaEnabled: true });
+    await chrome.action.setIcon({ path: voxaEnabled ? ICONS_ENABLED : ICONS_DISABLED });
+  }
+  applyActionIcon();
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === "local" && changes.voxaEnabled) {
+      void applyActionIcon();
+    }
+  });
   chrome.commands.onCommand.addListener(async (command) => {
     if (command === "start-dictation") {
       if (!await isEnabled()) return;

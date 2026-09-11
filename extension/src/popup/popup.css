@@ -72,22 +72,25 @@ body {
   margin-bottom: 6px;
 }
 
+.popup-select-wrapper {
+  position: relative;
+}
+
 .popup-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
   padding: 6px 10px;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   font-size: 13px;
+  font-family: inherit;
   color: #1f2937;
   background: #ffffff;
   cursor: pointer;
   outline: none;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  padding-right: 30px;
+  text-align: left;
 }
 
 .popup-select:hover {
@@ -99,13 +102,43 @@ body {
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
-.popup-select option {
-  background: #ffffff;
-  color: #1f2937;
+.popup-select-arrow {
+  color: #6b7280;
+  flex-shrink: 0;
 }
 
-.popup-select option:checked,
-.popup-select option:hover {
+.popup-language-menu {
+  position: absolute;
+  z-index: 2;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  padding: 4px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14);
+  max-height: 190px;
+  overflow-y: auto;
+}
+
+.popup-language-option {
+  display: block;
+  width: 100%;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #1f2937;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+}
+
+.popup-language-option:hover,
+.popup-language-option:focus-visible,
+.popup-language-option.selected {
   background: #3b82f6;
   color: #ffffff;
 }

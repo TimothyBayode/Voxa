@@ -1,5 +1,5 @@
 import { build } from 'vite'
-import { copyFileSync, cpSync, renameSync, existsSync, readFileSync, writeFileSync, readdirSync } from 'fs'
+import { copyFileSync, cpSync, renameSync, existsSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, resolve } from 'path'
 import { build as esbuild } from 'esbuild'
@@ -35,29 +35,6 @@ async function runBuild() {
   const finalPath = resolve(distDir, 'content.js')
   if (existsSync(iifePath)) {
     renameSync(iifePath, finalPath)
-  }
-
-  // Patch popup.html: fix script src and inject CSS link
-  const popupHtmlPath = resolve(distDir, 'popup.html')
-  if (existsSync(popupHtmlPath)) {
-    let html = readFileSync(popupHtmlPath, 'utf-8')
-
-    // Fix script src
-    html = html.replace('src="/src/popup/popup.tsx"', 'src="popup.js"')
-
-    // Find the CSS file and inject it
-    const assetsDir = resolve(distDir, 'assets')
-    if (existsSync(assetsDir)) {
-      const cssFiles = readdirSync(assetsDir).filter(f => f.endsWith('.css') && f.includes('popup'))
-      if (cssFiles.length > 0) {
-        const cssHref = `assets/${cssFiles[0]}`
-        const linkTag = `    <link rel="stylesheet" href="${cssHref}" />\n`
-        // Insert after the title tag
-        html = html.replace('</head>', `${linkTag}</head>`)
-      }
-    }
-
-    writeFileSync(popupHtmlPath, html)
   }
 
   copyFileSync(

@@ -39,3 +39,8 @@ export function getActiveEditableElement(): Element | null {
 
   return null
 }
+
+export async function isVoxaEnabled(): Promise<boolean> {
+  const result = await chrome.storage.local.get({ voxaEnabled: true })
+  return result.voxaEnabled === true
+}

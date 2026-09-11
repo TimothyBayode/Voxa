@@ -1,23 +1,49 @@
-export function insertTextAtCursor(text: string): boolean {
-  const active = document.activeElement
+export type TextSelection =
+  | { kind: 'value'; start: number; end: number }
+  | { kind: 'range'; range: Range }
+  | null
 
-  if (active instanceof HTMLInputElement) {
-    return insertIntoInput(active, text)
+export function captureSelection(element: Element): TextSelection {
+  if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+    return {
+      kind: 'value',
+      start: element.selectionStart ?? element.value.length,
+      end: element.selectionEnd ?? element.value.length,
+    }
   }
 
-  if (active instanceof HTMLTextAreaElement) {
-    return insertIntoTextarea(active, text)
+  if (element instanceof HTMLElement && element.isContentEditable) {
+    const currentSelection = window.getSelection()
+    if (currentSelection && currentSelection.rangeCount > 0 && element.contains(currentSelection.anchorNode)) {
+      return { kind: 'range', range: currentSelection.getRangeAt(0).cloneRange() }
+    }
   }
 
-  if (active instanceof HTMLElement && active.isContentEditable) {
-    return insertIntoContentEditable(active, text)
+  return null
+}
+
+export function insertTextAtCursor(text: string, target: Element, selection: TextSelection): boolean {
+  if (!target.isConnected) return false
+
+  if (target instanceof HTMLInputElement) {
+    return insertIntoInput(target, text, selection)
+  }
+
+  if (target instanceof HTMLTextAreaElement) {
+    return insertIntoTextarea(target, text, selection)
+  }
+
+  if (target instanceof HTMLElement && target.isContentEditable) {
+    return insertIntoContentEditable(target, text, selection)
   }
 
   return false
 }
 
-function insertIntoInput(input: HTMLInputElement, text: string): boolean {
-  const { selectionStart, selectionEnd, value } = input
+function insertIntoInput(input: HTMLInputElement, text: string, selection: TextSelection): boolean {
+  const { value } = input
+  const selectionStart = selection?.kind === 'value' ? selection.start : input.selectionStart
+  const selectionEnd = selection?.kind === 'value' ? selection.end : input.selectionEnd
 
   if (selectionStart === null || selectionEnd === null) {
     input.value = value + text
@@ -39,8 +65,10 @@ function insertIntoInput(input: HTMLInputElement, text: string): boolean {
   return true
 }
 
-function insertIntoTextarea(textarea: HTMLTextAreaElement, text: string): boolean {
-  const { selectionStart, selectionEnd, value } = textarea
+function insertIntoTextarea(textarea: HTMLTextAreaElement, text: string, selection: TextSelection): boolean {
+  const { value } = textarea
+  const selectionStart = selection?.kind === 'value' ? selection.start : textarea.selectionStart
+  const selectionEnd = selection?.kind === 'value' ? selection.end : textarea.selectionEnd
 
   if (selectionStart === null || selectionEnd === null) {
     textarea.value = value + text
@@ -62,11 +90,15 @@ function insertIntoTextarea(textarea: HTMLTextAreaElement, text: string): boolea
   return true
 }
 
-function insertIntoContentEditable(el: HTMLElement, text: string): boolean {
-  const selection = window.getSelection()
-  if (!selection) return false
+function insertIntoContentEditable(el: HTMLElement, text: string, savedSelection: TextSelection): boolean {
+  const activeSelection = window.getSelection()
+  if (!activeSelection) return false
 
-  const range = selection.getRangeAt(0)
+  const range = savedSelection?.kind === 'range' ? savedSelection.range.cloneRange() : document.createRange()
+  if (savedSelection?.kind !== 'range') {
+    range.selectNodeContents(el)
+    range.collapse(false)
+  }
   range.deleteContents()
 
   const textNode = document.createTextNode(text)
@@ -74,15 +106,15 @@ function insertIntoContentEditable(el: HTMLElement, text: string): boolean {
 
   range.setStartAfter(textNode)
   range.setEndAfter(textNode)
-  selection.removeAllRanges()
-  selection.addRange(range)
+  activeSelection.removeAllRanges()
+  activeSelection.addRange(range)
 
   dispatchInputEvent(el)
   return true
 }
 
 function dispatchInputEvent(el: HTMLElement): void {
-  const inputEvent = new Event('input', { bubbles: true })
+  const inputEvent = new InputEvent('input', { bubbles: true, inputType: 'insertText', data: null })
   el.dispatchEvent(inputEvent)
 
   const changeEvent = new Event('change', { bubbles: true })

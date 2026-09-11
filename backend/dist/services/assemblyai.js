@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-export async function transcribeAudio(audioBuffer, mimeType) {
+export async function transcribeAudio(audioBuffer, mimeType, languageCode = 'en') {
     const apiKey = process.env.ASSEMBLYAI_API_KEY;
     if (!apiKey) {
         throw new Error('AssemblyAI API key not configured');
@@ -40,6 +40,7 @@ export async function transcribeAudio(audioBuffer, mimeType) {
                     channels: channels,
                     encoding: encoding,
                 },
+                language_code: languageCode,
             }));
             ws.send(audioBuffer);
         });

@@ -61,6 +61,8 @@ export async function startDictation(): Promise<string> {
       try {
         const formData = new FormData()
         formData.append('audio', audioBlob, 'dictation.webm')
+        const language = await getSelectedLanguage()
+        formData.append('language', language)
 
         const response = await fetch(`${BACKEND_URL}/api/dictate`, {
           method: 'POST',
@@ -90,6 +92,11 @@ export async function startDictation(): Promise<string> {
 
     mediaRecorder.start(100)
   })
+}
+
+async function getSelectedLanguage(): Promise<string> {
+  const result = await chrome.storage.local.get({ voxaLanguage: 'en' })
+  return typeof result.voxaLanguage === 'string' ? result.voxaLanguage : 'en'
 }
 
 export function stopDictation(): void {

@@ -6,7 +6,7 @@ interface TranscriptMessage {
   transcripts?: Array<{ text: string }>
 }
 
-export async function transcribeAudio(audioBuffer: Buffer, mimeType: string): Promise<string> {
+export async function transcribeAudio(audioBuffer: Buffer, mimeType: string, languageCode = 'en'): Promise<string> {
   const apiKey = process.env.ASSEMBLYAI_API_KEY
 
   if (!apiKey) {
@@ -54,6 +54,7 @@ export async function transcribeAudio(audioBuffer: Buffer, mimeType: string): Pr
             channels: channels,
             encoding: encoding,
           },
+          language_code: languageCode,
         })
       )
 

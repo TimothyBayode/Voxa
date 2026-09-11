@@ -22,7 +22,7 @@ function Popup() {
   ]
 
   useEffect(() => {
-    chrome.storage.sync.get(['voxaEnabled', 'voxaLanguage'], (result) => {
+    chrome.storage.local.get(['voxaEnabled', 'voxaLanguage'], (result) => {
       if (result.voxaEnabled !== undefined) setEnabled(result.voxaEnabled)
       if (result.voxaLanguage) setLanguage(result.voxaLanguage)
     })
@@ -42,7 +42,7 @@ function Popup() {
   const toggleEnabled = () => {
     const newValue = !enabled
     setEnabled(newValue)
-    chrome.storage.sync.set({ voxaEnabled: newValue })
+    chrome.storage.local.set({ voxaEnabled: newValue })
   }
 
   const selectedLanguage = languages.find(item => item.value === language) || languages[0]
@@ -50,7 +50,25 @@ function Popup() {
   const selectLanguage = (value: string) => {
     setLanguage(value)
     setLanguageMenuOpen(false)
-    chrome.storage.sync.set({ voxaLanguage: value })
+    chrome.storage.local.set({ voxaLanguage: value })
+  }
+
+  const handleLanguageKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (!languageMenuOpen && (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault()
+      setLanguageMenuOpen(true)
+      return
+    }
+    if (!languageMenuOpen) return
+    const currentIndex = languages.findIndex(item => item.value === language)
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault()
+      const nextIndex = (currentIndex + (event.key === 'ArrowDown' ? 1 : -1) + languages.length) % languages.length
+      selectLanguage(languages[nextIndex].value)
+    } else if (event.key === 'Escape') {
+      event.preventDefault()
+      setLanguageMenuOpen(false)
+    }
   }
 
   return (
@@ -61,8 +79,8 @@ function Popup() {
       </div>
 
       <div className="popup-status">
-        <div className="status-dot" />
-        <span className="status-text">{enabled ? 'Ready' : 'Disabled'}</span>
+        <div className={`status-dot${enabled ? '' : ' disconnected'}`} />
+        <span className="status-text">{enabled ? 'Ready' : 'Disconnected'}</span>
       </div>
 
       <div className="popup-section">
@@ -74,6 +92,7 @@ function Popup() {
             aria-haspopup="listbox"
             aria-expanded={languageMenuOpen}
             onClick={() => setLanguageMenuOpen(open => !open)}
+            onKeyDown={handleLanguageKeyDown}
           >
             <span>{selectedLanguage.label}</span>
             <span className="popup-select-arrow" aria-hidden="true">⌄</span>

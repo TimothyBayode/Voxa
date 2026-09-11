@@ -5,34 +5,46 @@ interface PopUnderProps {
   state: PopUnderState
   errorMessage?: string
   targetRect: DOMRect | null
+  targetElement: Element | null
   onDictationAction: () => void
 }
 
-export function PopUnder({ state, errorMessage, targetRect, onDictationAction }: PopUnderProps) {
+export function PopUnder({ state, errorMessage, targetRect, targetElement, onDictationAction }: PopUnderProps) {
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
   const popRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!targetRect) return
+    if (!targetRect || !targetElement) return
 
     const popWidth = 240
     const popHeight = state === 'idle' ? 44 : 52
     const gap = 4
 
-    let top = targetRect.bottom + gap
-    let left = targetRect.left + (targetRect.width / 2) - (popWidth / 2)
+    const updatePosition = () => {
+      const rect = targetElement.getBoundingClientRect()
+      let top = rect.bottom + gap
+      let left = rect.left + (rect.width / 2) - (popWidth / 2)
 
     // Keep within viewport
     const viewportWidth = window.innerWidth
     const viewportHeight = window.innerHeight
 
-    if (left < 8) left = 8
-    if (left + popWidth > viewportWidth - 8) left = viewportWidth - popWidth - 8
-    if (top + popHeight > viewportHeight - 8) top = targetRect.top - popHeight - gap
-    if (top < 8) top = 8
+      if (left < 8) left = 8
+      if (left + popWidth > viewportWidth - 8) left = viewportWidth - popWidth - 8
+      if (top + popHeight > viewportHeight - 8) top = rect.top - popHeight - gap
+      if (top < 8) top = 8
 
-    setPosition({ top, left })
-  }, [targetRect, state])
+      setPosition({ top, left })
+    }
+
+    updatePosition()
+    window.addEventListener('scroll', updatePosition, true)
+    window.addEventListener('resize', updatePosition)
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true)
+      window.removeEventListener('resize', updatePosition)
+    }
+  }, [targetRect, targetElement, state])
 
   if (!position) return null
 

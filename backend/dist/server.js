@@ -20237,7 +20237,7 @@ var import_websocket_server = __toESM(require_websocket_server(), 1);
 var wrapper_default = import_websocket.default;
 
 // src/services/assemblyai.ts
-async function transcribeAudio(audioBuffer, mimeType) {
+async function transcribeAudio(audioBuffer, mimeType, languageCode = "en") {
   const apiKey = process.env.ASSEMBLYAI_API_KEY;
   if (!apiKey) {
     throw new Error("AssemblyAI API key not configured");
@@ -20278,7 +20278,8 @@ async function transcribeAudio(audioBuffer, mimeType) {
             sample_rate: sampleRate,
             channels,
             encoding
-          }
+          },
+          language_code: languageCode
         })
       );
       ws.send(audioBuffer);
@@ -20338,7 +20339,8 @@ app.post("/api/dictate", upload.single("audio"), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ error: "No audio file provided" });
     }
-    const transcript = await transcribeAudio(req.file.buffer, req.file.mimetype);
+    const language = typeof req.body.language === "string" ? req.body.language : "en";
+    const transcript = await transcribeAudio(req.file.buffer, req.file.mimetype, language);
     res.json({ text: transcript });
   } catch (error) {
     console.error("Dictation error:", error);

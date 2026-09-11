@@ -2,8 +2,8 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { PopUnder } from './popUnder'
 import { setupFocusDetection } from './focusDetection'
-import { getActiveEditableElement } from './utils'
-import { insertTextAtCursor } from './textInsertion'
+import { getActiveEditableElement, isVoxaEnabled } from './utils'
+import { captureSelection, insertTextAtCursor, type TextSelection } from './textInsertion'
 import { startDictation, stopDictation as stopRecording } from './recorder'
 import type { PopUnderState } from '../components/types'
 
@@ -145,12 +145,14 @@ const POP_UNDER_CSS = `
 type DictationState = {
   state: PopUnderState
   targetElement: Element | null
+  selection: TextSelection
   errorMessage: string
 }
 
 const dictationState: DictationState = {
   state: 'hidden',
   targetElement: null,
+  selection: null,
   errorMessage: '',
 }
 
@@ -192,6 +194,7 @@ function showPopUnder() {
 function hidePopUnder() {
   dictationState.state = 'hidden'
   dictationState.targetElement = null
+  dictationState.selection = null
   dictationState.errorMessage = ''
   renderPopUnder()
 }
@@ -213,6 +216,7 @@ function renderPopUnder() {
       state: dictationState.state,
       errorMessage: dictationState.errorMessage,
       targetRect: dictationState.targetElement?.getBoundingClientRect() || null,
+      targetElement: dictationState.targetElement,
       onDictationAction: async () => {
         if (dictationState.state === 'listening') {
           await stopDictation()
@@ -225,6 +229,8 @@ function renderPopUnder() {
 }
 
 async function startDictationFlow(forceTarget?: Element) {
+  if (!(await isVoxaEnabled())) return
+
   if (dictationState.state === 'listening') {
     await stopDictation()
     return
@@ -234,6 +240,7 @@ async function startDictationFlow(forceTarget?: Element) {
   if (!target) return
 
   dictationState.targetElement = target
+  dictationState.selection = captureSelection(target)
   dictationState.errorMessage = ''
   dictationState.state = 'listening'
   showPopUnder()
@@ -252,7 +259,7 @@ async function startDictationFlow(forceTarget?: Element) {
 
       await new Promise(resolve => setTimeout(resolve, 50))
 
-      const inserted = insertTextAtCursor(transcript)
+      const inserted = insertTextAtCursor(transcript, dictationState.targetElement, dictationState.selection)
 
       if (inserted) {
         dictationState.state = 'success'
@@ -278,6 +285,7 @@ async function startDictationFlow(forceTarget?: Element) {
     setTimeout(() => {
       dictationState.state = 'hidden'
       dictationState.targetElement = null
+      dictationState.selection = null
       dictationState.errorMessage = ''
       renderPopUnder()
     }, 2500)
@@ -301,8 +309,17 @@ function getErrorMessage(error: any): string {
   return "Couldn't transcribe. Try again."
 }
 
-function init() {
+async function init() {
+  let enabled = await isVoxaEnabled()
+
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== 'local' || !changes.voxaEnabled) return
+    enabled = changes.voxaEnabled.newValue !== false
+    if (!enabled && dictationState.state === 'idle') hidePopUnder()
+  })
+
   const handleShortcut = (event: KeyboardEvent) => {
+    if (!enabled) return
     if (!event.altKey || !event.shiftKey || event.key.toLowerCase() !== 'd') return
 
     const active = getActiveEditableElement()
@@ -322,6 +339,7 @@ function init() {
 
   setupFocusDetection(
     (element) => {
+      if (!enabled) return
       if (dictationState.state === 'hidden') {
         dictationState.targetElement = element
         dictationState.state = 'idle'
@@ -339,13 +357,17 @@ function init() {
   // Listen for messages from service worker (commands + context menu)
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message.action === 'start-dictation') {
+      if (!enabled) {
+        sendResponse({ ok: false, error: 'Voxa is disabled' })
+        return true
+      }
       // For context menu: use stored target element if no active editable
       const active = getActiveEditableElement()
       const target = active || dictationState.targetElement
       if (target) {
-        startDictationFlow(target)
+        void startDictationFlow(target)
       } else if (dictationState.state !== 'hidden') {
-        startDictationFlow()
+        void startDictationFlow()
       }
       sendResponse({ ok: true })
     }

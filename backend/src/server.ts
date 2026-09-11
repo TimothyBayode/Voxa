@@ -25,7 +25,8 @@ app.post('/api/dictate', upload.single('audio'), async (req, res) => {
       return res.status(400).json({ error: 'No audio file provided' })
     }
 
-    const transcript = await transcribeAudio(req.file.buffer, req.file.mimetype)
+    const language = typeof req.body.language === 'string' ? req.body.language : 'en'
+    const transcript = await transcribeAudio(req.file.buffer, req.file.mimetype, language)
 
     res.json({ text: transcript })
   } catch (error: any) {

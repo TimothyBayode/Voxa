@@ -20,12 +20,12 @@ body {
   margin-bottom: 16px;
 }
 
-.popup-title {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  color: #1f2937;
+.popup-title-logo {
+  display: block;
+  height: 20px;
+  width: auto;
   margin-bottom: 4px;
+  -webkit-user-drag: none;
 }
 
 .popup-tagline {

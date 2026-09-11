@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { createRoot } from 'react-dom/client'
 import './popup.css'
+import voxaWordmarkUrl from '../assets/logo.svg'
 
 const LANGUAGES = [
   { value: 'en', label: 'English' },
@@ -74,8 +75,8 @@ function Popup() {
   return (
     <div className="popup">
       <div className="popup-header">
-        <h1 className="popup-title">VOXA</h1>
-        <p className="popup-tagline">Turn every text box<br />into a microphone.</p>
+        <img src={voxaWordmarkUrl} alt="VOXA" className="popup-title-logo" draggable={false} />
+        <p className="popup-tagline">Turn every text box into a microphone.</p>
       </div>
 
       <div className="popup-status">

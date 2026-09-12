@@ -346,19 +346,12 @@ voxa/
 
 Voxa is an open-source project, built and maintained in spare time. Sponsorships directly support continued development, the infrastructure and API costs behind transcription, day-to-day maintenance, and the roadmap of new features and improvements.
 
-If Voxa saves you typing, here are two ways to keep the project going:
+If Voxa saves you typing, here are two ways to keep the project going — a one-time coffee, or ongoing sponsorship through GitHub:
 
-### Buy Me a Coffee
-
-If Voxa has been useful to you, a one-time contribution is a simple way to say thanks and help cover running costs:
-
-[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://buymeacoffee.com/timothybayode)
-
-### GitHub Sponsors
-
-If you'd like to back Voxa's ongoing development through GitHub, you can sponsor the project here:
-
-[![Sponsor TimothyBayode](https://img.shields.io/badge/GitHub%20Sponsors-sponsor%20%40TimothyBayode-EA4AAA?style=flat-square&logo=github&logoColor=white)](https://github.com/sponsors/TimothyBayode)
+<p>
+  <a href="https://buymeacoffee.com/timothybayode"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="32"></a>&nbsp;&nbsp;
+  <a href="https://github.com/sponsors/TimothyBayode"><img src="https://img.shields.io/badge/Sponsor-EA4AAA?style=flat-square&logo=githubsponsors&logoColor=white" alt="Sponsor TimothyBayode" height="32"></a>
+</p>
 
 Every contribution, big or small, helps keep Voxa independent and ad-free. Thank you for your support!
 

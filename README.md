@@ -27,7 +27,7 @@ No accounts. No sign-ups. No configuration. Download, load into Chrome, and dict
 
 You only need **Google Chrome** and the **Voxa ZIP file**.
 
-1. **Download** the Voxa ZIP file (from your hackathon submission or the [Releases](https://github.com/TimothyBayode/Voxa/releases) page).
+1. **Download** the Voxa extension: click [**Download voxa-extension.zip**](https://github.com/TimothyBayode/Voxa/raw/main/extension/voxa-extension.zip) — the ZIP file downloads to your computer.
 2. **Extract** the ZIP file — right-click it and choose *Extract All* (Windows) or double-click it (Mac). Remember where you saved it.
 3. **Open Google Chrome**.
 4. In the address bar, type `chrome://extensions` and press **Enter**.

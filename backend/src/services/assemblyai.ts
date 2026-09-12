@@ -1,104 +1,78 @@
-import WebSocket from 'ws'
+const DICTATION_ENDPOINT = 'https://dictation.assemblyai.com/v1/transcribe/live'
+const REQUEST_TIMEOUT_MS = 90_000
 
-interface TranscriptMessage {
-  message_type: string
-  text?: string
-  transcripts?: Array<{ text: string }>
+const SUPPORTED_LANGUAGES = new Set([
+  'en', 'es', 'de', 'fr', 'it', 'pt', 'tr', 'nl', 'sv', 'no',
+  'da', 'fi', 'hi', 'vi', 'ar', 'he', 'ja', 'ur', 'zh',
+])
+
+export interface TranscriptionResult {
+  text: string
+  llmResponse: string | null
 }
 
-export async function transcribeAudio(audioBuffer: Buffer, mimeType: string, languageCode = 'en'): Promise<string> {
+export async function transcribeAudio(
+  audioBuffer: Buffer,
+  languageCode = 'en',
+  sampleRate = 16000
+): Promise<TranscriptionResult> {
   const apiKey = process.env.ASSEMBLYAI_API_KEY
 
   if (!apiKey) {
     throw new Error('AssemblyAI API key not configured')
   }
 
-  const wsUrl = 'wss://dictation.assemblyai.com/v1/listen'
+  const language = SUPPORTED_LANGUAGES.has(languageCode) ? languageCode : 'en'
+  const rate = Number.isFinite(sampleRate) && sampleRate >= 8000 && sampleRate <= 48000 ? Math.round(sampleRate) : 16000
 
-  return new Promise((resolve, reject) => {
-    const ws = new WebSocket(wsUrl, {
-      headers: {
-        Authorization: apiKey,
-      },
+  const config = {
+    language_codes: [language],
+    sample_rate: rate,
+    channels: 1,
+  }
+
+  const form = new FormData()
+  // `config` must arrive before `audio` — the endpoint starts reading immediately
+  form.append('config', new Blob([JSON.stringify(config)], { type: 'application/json' }))
+  form.append('audio', new Blob([new Uint8Array(audioBuffer)], { type: 'audio/pcm' }), 'audio')
+
+  let response: Response
+  try {
+    response = await fetch(DICTATION_ENDPOINT, {
+      method: 'POST',
+      headers: { Authorization: apiKey },
+      body: form,
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     })
-
-    let fullTranscript = ''
-    let sessionStarted = false
-    let transcriptsReceived = false
-    let timeoutHandle: NodeJS.Timeout
-
-    const TIMEOUT_MS = 60000
-
-    const cleanup = () => {
-      clearTimeout(timeoutHandle)
-      try { ws.close() } catch {}
+  } catch (error: any) {
+    if (error?.name === 'TimeoutError' || error?.name === 'AbortError') {
+      throw new Error('Transcription timeout')
     }
+    throw new Error('Could not reach AssemblyAI: ' + (error?.message || 'network error'))
+  }
 
-    timeoutHandle = setTimeout(() => {
-      cleanup()
-      if (!transcriptsReceived) {
-        reject(new Error('Transcription timeout'))
-      }
-    }, TIMEOUT_MS)
+  const body: any = await response.json().catch(() => null)
 
-    ws.on('open', () => {
-      const sampleRate = 16000
-      const channels = 1
-      const encoding = mimeType.includes('webm') ? 'webm' : 'pcm_s16le'
+  if (!response.ok) {
+    throw new Error(describeApiError(response.status, body))
+  }
 
-      ws.send(
-        JSON.stringify({
-          message_type: 'session_begins',
-          audio_format: {
-            sample_rate: sampleRate,
-            channels: channels,
-            encoding: encoding,
-          },
-          language_code: languageCode,
-        })
-      )
+  const text = typeof body?.text === 'string' ? body.text : ''
+  const llmResponse = typeof body?.llm_response === 'string' ? body.llm_response : null
 
-      ws.send(audioBuffer)
-    })
+  return { text, llmResponse }
+}
 
-    ws.on('message', (data: WebSocket.Data) => {
-      try {
-        const message: TranscriptMessage = JSON.parse(data.toString())
+function describeApiError(status: number, body: any): string {
+  // Per docs: invalid API key returns 404 (not 401), unsupported audio returns 415.
+  // Error bodies are either { error, error_code } or { status, title, detail }.
+  const detail =
+    (typeof body?.error === 'string' && body.error) ||
+    (typeof body?.detail === 'string' && body.detail) ||
+    (typeof body?.title === 'string' && body.title) ||
+    'Unknown error'
 
-        if (message.message_type === 'session_begins') {
-          sessionStarted = true
-        } else if (message.message_type === 'interim_transcript' && message.text) {
-        } else if (message.message_type === 'final_transcript' && message.text) {
-          fullTranscript += message.text + ' '
-          transcriptsReceived = true
-        } else if (message.message_type === 'session_ends' && message.transcripts) {
-          for (const t of message.transcripts) {
-            fullTranscript += t.text + ' '
-          }
-          transcriptsReceived = true
-          cleanup()
-          resolve(fullTranscript.trim())
-        } else if (message.message_type === 'error') {
-          cleanup()
-          reject(new Error('AssemblyAI error: ' + JSON.stringify(message)))
-        }
-      } catch {
-        // Ignore non-JSON messages
-      }
-    })
-
-    ws.on('error', (error: Error) => {
-      cleanup()
-      reject(new Error('WebSocket error: ' + error.message))
-    })
-
-    ws.on('close', () => {
-      cleanup()
-      if (!transcriptsReceived && sessionStarted) {
-        resolve(fullTranscript.trim() || '')
-      } else if (!transcriptsReceived) {
-        reject(new Error('Connection closed before transcription completed'))
-      }
-    })
-  })
+  if (status === 404) return `AssemblyAI rejected the API key (404): ${detail}`
+  if (status === 415) return `AssemblyAI rejected the audio format (415): ${detail}`
+  return `AssemblyAI error (HTTP ${status}): ${detail}`
 }

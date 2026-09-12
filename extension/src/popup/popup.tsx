@@ -6,14 +6,22 @@ import voxaWordmarkUrl from '../assets/logo.svg'
 const LANGUAGES = [
   { value: 'en', label: 'English' },
   { value: 'es', label: 'Spanish' },
-  { value: 'fr', label: 'French' },
   { value: 'de', label: 'German' },
+  { value: 'fr', label: 'French' },
   { value: 'it', label: 'Italian' },
   { value: 'pt', label: 'Portuguese' },
+  { value: 'tr', label: 'Turkish' },
   { value: 'nl', label: 'Dutch' },
+  { value: 'sv', label: 'Swedish' },
+  { value: 'da', label: 'Danish' },
+  { value: 'fi', label: 'Finnish' },
+  { value: 'hi', label: 'Hindi' },
+  { value: 'vi', label: 'Vietnamese' },
+  { value: 'ar', label: 'Arabic' },
+  { value: 'he', label: 'Hebrew' },
   { value: 'ja', label: 'Japanese' },
-  { value: 'ko', label: 'Korean' },
-  { value: 'zh', label: 'Chinese' },
+  { value: 'ur', label: 'Urdu' },
+  { value: 'zh', label: 'Mandarin' },
 ]
 
 function Popup() {

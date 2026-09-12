@@ -8,7 +8,17 @@ const app = express()
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000
 
 const corsOrigin = process.env.CORS_ORIGIN || '*'
-app.use(cors({ origin: corsOrigin }))
+
+// Content scripts fetch with the host page's origin (not chrome-extension://),
+// so wildcard values are answered by reflecting the request origin.
+app.use(
+  cors({
+    origin:
+      corsOrigin === '*' || corsOrigin === 'chrome-extension://*'
+        ? true
+        : corsOrigin.split(',').map(o => o.trim()),
+  })
+)
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -26,12 +36,14 @@ app.post('/api/dictate', upload.single('audio'), async (req, res) => {
     }
 
     const language = typeof req.body.language === 'string' ? req.body.language : 'en'
-    const transcript = await transcribeAudio(req.file.buffer, req.file.mimetype, language)
+    const sampleRate = Number.parseInt(req.body.sampleRate, 10) || 16000
+    const result = await transcribeAudio(req.file.buffer, language, sampleRate)
 
-    res.json({ text: transcript })
+    // Cleaned-up rewrite when available, verbatim transcript as fallback
+    res.json({ text: result.llmResponse ?? result.text })
   } catch (error: any) {
     console.error('Dictation error:', error)
-    res.status(500).json({ error: 'Transcription failed' })
+    res.status(500).json({ error: error?.message || 'Transcription failed' })
   }
 })
 

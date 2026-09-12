@@ -245,7 +245,7 @@ async function startDictationFlow(forceTarget?: Element) {
     return
   }
 
-  const target = forceTarget || getActiveEditableElement()
+  const target = forceTarget || getActiveEditableElement() || dictationState.targetElement
   if (!target) return
 
   dictationState.targetElement = target

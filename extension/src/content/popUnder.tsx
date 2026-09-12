@@ -115,6 +115,7 @@ export function PopUnder({ state, errorMessage, targetRect, targetElement, onDic
       className="pop-under"
       role="button"
       tabIndex={0}
+      onMouseDown={(event) => event.preventDefault()}
       onClick={onDictationAction}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {

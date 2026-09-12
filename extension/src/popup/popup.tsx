@@ -4,24 +4,100 @@ import './popup.css'
 import voxaWordmarkUrl from '../assets/logo.svg'
 
 const LANGUAGES = [
-  { value: 'en', label: 'English' },
-  { value: 'es', label: 'Spanish' },
-  { value: 'de', label: 'German' },
-  { value: 'fr', label: 'French' },
-  { value: 'it', label: 'Italian' },
-  { value: 'pt', label: 'Portuguese' },
-  { value: 'tr', label: 'Turkish' },
-  { value: 'nl', label: 'Dutch' },
-  { value: 'sv', label: 'Swedish' },
-  { value: 'da', label: 'Danish' },
-  { value: 'fi', label: 'Finnish' },
-  { value: 'hi', label: 'Hindi' },
-  { value: 'vi', label: 'Vietnamese' },
+  { value: 'af', label: 'Afrikaans' },
+  { value: 'sq', label: 'Albanian' },
+  { value: 'am', label: 'Amharic' },
   { value: 'ar', label: 'Arabic' },
+  { value: 'hy', label: 'Armenian' },
+  { value: 'as', label: 'Assamese' },
+  { value: 'az', label: 'Azerbaijani' },
+  { value: 'eu', label: 'Basque' },
+  { value: 'be', label: 'Belarusian' },
+  { value: 'bn', label: 'Bengali' },
+  { value: 'bs', label: 'Bosnian' },
+  { value: 'bg', label: 'Bulgarian' },
+  { value: 'ca', label: 'Catalan' },
+  { value: 'zh', label: 'Chinese' },
+  { value: 'hr', label: 'Croatian' },
+  { value: 'cs', label: 'Czech' },
+  { value: 'da', label: 'Danish' },
+  { value: 'nl', label: 'Dutch' },
+  { value: 'en', label: 'English' },
+  { value: 'et', label: 'Estonian' },
+  { value: 'fi', label: 'Finnish' },
+  { value: 'fr', label: 'French' },
+  { value: 'gl', label: 'Galician' },
+  { value: 'ka', label: 'Georgian' },
+  { value: 'de', label: 'German' },
+  { value: 'el', label: 'Greek' },
+  { value: 'gu', label: 'Gujarati' },
+  { value: 'ht', label: 'Haitian' },
+  { value: 'ha', label: 'Hausa' },
+  { value: 'haw', label: 'Hawaiian' },
   { value: 'he', label: 'Hebrew' },
+  { value: 'hi', label: 'Hindi' },
+  { value: 'hu', label: 'Hungarian' },
+  { value: 'is', label: 'Icelandic' },
+  { value: 'id', label: 'Indonesian' },
+  { value: 'it', label: 'Italian' },
   { value: 'ja', label: 'Japanese' },
+  { value: 'jw', label: 'Javanese' },
+  { value: 'kn', label: 'Kannada' },
+  { value: 'kk', label: 'Kazakh' },
+  { value: 'ko', label: 'Korean' },
+  { value: 'lo', label: 'Lao' },
+  { value: 'la', label: 'Latin' },
+  { value: 'lv', label: 'Latvian' },
+  { value: 'lt', label: 'Lithuanian' },
+  { value: 'lb', label: 'Luxembourgish' },
+  { value: 'mk', label: 'Macedonian' },
+  { value: 'mg', label: 'Malagasy' },
+  { value: 'ms', label: 'Malay' },
+  { value: 'ml', label: 'Malayalam' },
+  { value: 'mt', label: 'Maltese' },
+  { value: 'mi', label: 'Maori' },
+  { value: 'mr', label: 'Marathi' },
+  { value: 'mn', label: 'Mongolian' },
+  { value: 'ne', label: 'Nepali' },
+  { value: 'no', label: 'Norwegian' },
+  { value: 'pa', label: 'Panjabi' },
+  { value: 'ps', label: 'Pashto' },
+  { value: 'fa', label: 'Persian' },
+  { value: 'pl', label: 'Polish' },
+  { value: 'pt', label: 'Portuguese' },
+  { value: 'ro', label: 'Romanian' },
+  { value: 'ru', label: 'Russian' },
+  { value: 'sr', label: 'Serbian' },
+  { value: 'sn', label: 'Shona' },
+  { value: 'sd', label: 'Sindhi' },
+  { value: 'si', label: 'Sinhala' },
+  { value: 'sk', label: 'Slovak' },
+  { value: 'sl', label: 'Slovenian' },
+  { value: 'so', label: 'Somali' },
+  { value: 'es', label: 'Spanish' },
+  { value: 'su', label: 'Sundanese' },
+  { value: 'sw', label: 'Swahili' },
+  { value: 'sv', label: 'Swedish' },
+  { value: 'tl', label: 'Tagalog' },
+  { value: 'tg', label: 'Tajik' },
+  { value: 'ta', label: 'Tamil' },
+  { value: 'te', label: 'Telugu' },
+  { value: 'tr', label: 'Turkish' },
+  { value: 'uk', label: 'Ukrainian' },
   { value: 'ur', label: 'Urdu' },
-  { value: 'zh', label: 'Mandarin' },
+  { value: 'uz', label: 'Uzbek' },
+  { value: 'vi', label: 'Vietnamese' },
+  { value: 'cy', label: 'Welsh' },
+  { value: 'yi', label: 'Yiddish' },
+  { value: 'yo', label: 'Yoruba' },
+]
+
+const FOOTER_LINKS = [
+  { label: 'Documentation', url: 'https://github.com/TimothyBayode/Voxa' },
+  { label: 'Privacy Policy', url: 'https://github.com/TimothyBayode/Voxa#privacy' },
+  { label: 'Terms of Use', url: 'https://github.com/TimothyBayode/Voxa#license' },
+  { label: 'Help', url: 'https://github.com/TimothyBayode/Voxa/issues' },
+  { label: 'Support Voxa', url: 'https://buymeacoffee.com/timothybayode' },
 ]
 
 function Popup() {
@@ -93,7 +169,7 @@ function Popup() {
       </div>
 
       <div className="popup-section">
-        <label className="popup-label">Language</label>
+        <label className="popup-label">Output language</label>
         <div className="popup-select-wrapper" ref={dropdownRef}>
           <button
             type="button"
@@ -139,13 +215,6 @@ function Popup() {
       </div>
 
       <div className="popup-section">
-        <div className="popup-label">Keyboard shortcut</div>
-        <div className="popup-shortcut">Alt + Shift + D</div>
-      </div>
-
-      <div className="popup-divider" />
-
-      <div className="popup-section">
         <label className="popup-toggle">
           <input
             type="checkbox"
@@ -157,19 +226,24 @@ function Popup() {
         </label>
       </div>
 
+      <div className="popup-divider" />
+
       <div className="popup-footer">
-        <a
-          href="https://github.com/TimothyBayode/Voxa"
-          className="popup-link"
-          target="_blank"
-          rel="noreferrer"
-          onClick={(e) => {
-            e.preventDefault()
-            chrome.tabs.create({ url: 'https://github.com/TimothyBayode/Voxa' })
-          }}
-        >
-          Documentation
-        </a>
+        {FOOTER_LINKS.map((link) => (
+          <a
+            key={link.label}
+            href={link.url}
+            className="popup-link"
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => {
+              e.preventDefault()
+              chrome.tabs.create({ url: link.url })
+            }}
+          >
+            {link.label}
+          </a>
+        ))}
       </div>
     </div>
   )

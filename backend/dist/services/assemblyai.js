@@ -1,21 +1,57 @@
 const DICTATION_ENDPOINT = 'https://dictation.assemblyai.com/v1/transcribe/live';
 const REQUEST_TIMEOUT_MS = 90000;
-const SUPPORTED_LANGUAGES = new Set([
+// Codes the Dictation API accepts for `language_codes` (transcription steering)
+const STEERING_CODES = new Set([
     'en', 'es', 'de', 'fr', 'it', 'pt', 'tr', 'nl', 'sv', 'no',
     'da', 'fi', 'hi', 'vi', 'ar', 'he', 'ja', 'ur', 'zh',
 ]);
-export async function transcribeAudio(audioBuffer, languageCode = 'en', sampleRate = 16000) {
+// Languages the rewrite step can translate into (Speech Understanding translation support)
+const TRANSLATION_LANGUAGES = {
+    en: 'English', sq: 'Albanian', am: 'Amharic', ar: 'Arabic', hy: 'Armenian',
+    as: 'Assamese', az: 'Azerbaijani', eu: 'Basque', be: 'Belarusian', bn: 'Bengali',
+    bs: 'Bosnian', bg: 'Bulgarian', ca: 'Catalan', zh: 'Chinese', hr: 'Croatian',
+    cs: 'Czech', da: 'Danish', nl: 'Dutch', en_au: 'Australian English', en_uk: 'British English',
+    en_us: 'US English', et: 'Estonian', fi: 'Finnish', fr: 'French', gl: 'Galician',
+    ka: 'Georgian', de: 'German', el: 'Greek', gu: 'Gujarati', ht: 'Haitian',
+    ha: 'Hausa', haw: 'Hawaiian', he: 'Hebrew', hi: 'Hindi', hu: 'Hungarian',
+    is: 'Icelandic', id: 'Indonesian', it: 'Italian', ja: 'Japanese', jw: 'Javanese',
+    kn: 'Kannada', kk: 'Kazakh', ko: 'Korean', lo: 'Lao', la: 'Latin',
+    lv: 'Latvian', lt: 'Lithuanian', lb: 'Luxembourgish', mk: 'Macedonian', mg: 'Malagasy',
+    ms: 'Malay', ml: 'Malayalam', mt: 'Maltese', mi: 'Maori', mr: 'Marathi',
+    mn: 'Mongolian', ne: 'Nepali', no: 'Norwegian', pa: 'Panjabi', ps: 'Pashto',
+    fa: 'Persian', pl: 'Polish', pt: 'Portuguese', ro: 'Romanian', ru: 'Russian',
+    sr: 'Serbian', sn: 'Shona', sd: 'Sindhi', si: 'Sinhala', sk: 'Slovak',
+    sl: 'Slovenian', so: 'Somali', es: 'Spanish', su: 'Sundanese', sw: 'Swahili',
+    sv: 'Swedish', tl: 'Tagalog', tg: 'Tajik', ta: 'Tamil', te: 'Telugu',
+    tr: 'Turkish', uk: 'Ukrainian', ur: 'Urdu', uz: 'Uzbek', vi: 'Vietnamese',
+    cy: 'Welsh', yi: 'Yiddish', yo: 'Yoruba',
+};
+function buildTranslationInstruction(languageName) {
+    return (`Translate the transcript to ${languageName}. ` +
+        'Remove filler words, resolve self-corrections to what the speaker landed on, ' +
+        'and apply proper punctuation and capitalization. ' +
+        'Keep names and technical terms verbatim.');
+}
+export async function transcribeAudio(audioBuffer, targetLanguage = 'en', sampleRate = 16000) {
     const apiKey = process.env.ASSEMBLYAI_API_KEY;
     if (!apiKey) {
         throw new Error('AssemblyAI API key not configured');
     }
-    const language = SUPPORTED_LANGUAGES.has(languageCode) ? languageCode : 'en';
+    const target = TRANSLATION_LANGUAGES[targetLanguage] ? targetLanguage : 'en';
     const rate = Number.isFinite(sampleRate) && sampleRate >= 8000 && sampleRate <= 48000 ? Math.round(sampleRate) : 16000;
+    // Steer transcription toward the target language when the Dictation API supports it,
+    // with English as the fallback for cross-language dictation (e.g. speak English -> Portuguese out)
+    const steering = target !== 'en' && STEERING_CODES.has(target) ? [target, 'en'] : ['en'];
     const config = {
-        language_codes: [language],
+        language_codes: steering,
         sample_rate: rate,
         channels: 1,
     };
+    // The rewrite step translates when the target differs from English;
+    // omitting llm_instruction keeps the default cleanup task
+    if (target !== 'en') {
+        config.llm_instruction = buildTranslationInstruction(TRANSLATION_LANGUAGES[target]);
+    }
     const form = new FormData();
     // `config` must arrive before `audio` — the endpoint starts reading immediately
     form.append('config', new Blob([JSON.stringify(config)], { type: 'application/json' }));

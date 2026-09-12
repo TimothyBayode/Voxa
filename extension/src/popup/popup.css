@@ -64,12 +64,13 @@ body {
 }
 
 .popup-label {
+  display: block;
   font-size: 11px;
   font-weight: 500;
   color: #6b7280;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 6px;
+  margin-bottom: 12px;
 }
 
 .popup-select-wrapper {
@@ -143,19 +144,6 @@ body {
   color: #ffffff;
 }
 
-.popup-shortcut {
-  font-size: 12px;
-  color: #3b82f6;
-  font-weight: 500;
-  font-family: monospace;
-}
-
-.popup-divider {
-  height: 1px;
-  background: #e5e7eb;
-  margin: 12px 0;
-}
-
 .popup-toggle {
   display: flex;
   align-items: center;
@@ -202,9 +190,17 @@ body {
   color: #1f2937;
 }
 
+.popup-divider {
+  height: 1px;
+  background: #e5e7eb;
+}
+
 .popup-footer {
-  margin-top: 12px;
-  text-align: center;
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 12px;
 }
 
 .popup-link {

@@ -27,14 +27,13 @@ let currentTimer: number | null = null
 
 let chunks: Float32Array[] = []
 let totalSamples = 0
+let sessionToken = 0
 
-let finishRecording: ((transcript: string) => void) | null = null
-let failRecording: ((error: Error) => void) | null = null
-
-export async function startDictation(): Promise<string> {
+export async function startRecording(onAutoStop?: () => void): Promise<void> {
   if (currentContext) {
     cancelCapture()
   }
+  const token = ++sessionToken
 
   let stream: MediaStream
   try {
@@ -51,6 +50,12 @@ export async function startDictation(): Promise<string> {
       throw new Error('Microphone access is required to dictate.')
     }
     throw error
+  }
+
+  // Stop was requested while the mic prompt was still open
+  if (token !== sessionToken) {
+    stream.getTracks().forEach(track => track.stop())
+    return
   }
 
   currentStream = stream
@@ -82,54 +87,40 @@ export async function startDictation(): Promise<string> {
   processor.connect(silence)
   silence.connect(context.destination)
 
-  return new Promise<string>((resolve, reject) => {
-    finishRecording = resolve
-    failRecording = reject
-
-    currentTimer = window.setTimeout(() => {
-      void stopDictation()
-    }, MAX_RECORDING_MS)
-  })
+  currentTimer = window.setTimeout(() => {
+    currentTimer = null
+    onAutoStop?.()
+  }, MAX_RECORDING_MS)
 }
 
-export async function stopDictation(): Promise<void> {
+export async function stopRecording(): Promise<string> {
+  sessionToken++ // invalidate any in-flight start
   const captured = teardown()
-  if (!captured || !finishRecording) return
 
-  const finish = finishRecording
-  const fail = failRecording
-  finishRecording = null
-  failRecording = null
-
-  if (captured.totalSamples < MIN_SAMPLES) {
-    finish('')
-    return
+  if (!captured || captured.totalSamples < MIN_SAMPLES) {
+    return ''
   }
 
-  try {
-    const pcm = floatTo16BitPCM(captured.chunks, captured.totalSamples)
-    const language = await getSelectedLanguage()
+  const pcm = floatTo16BitPCM(captured.chunks, captured.totalSamples)
+  const language = await getSelectedLanguage()
 
-    const formData = new FormData()
-    formData.append('audio', new Blob([pcm], { type: 'audio/pcm' }), 'dictation.pcm')
-    formData.append('language', language)
-    formData.append('sampleRate', String(captured.sampleRate))
+  const formData = new FormData()
+  formData.append('audio', new Blob([pcm], { type: 'audio/pcm' }), 'dictation.pcm')
+  formData.append('language', language)
+  formData.append('sampleRate', String(captured.sampleRate))
 
-    const response = await fetch(`${BACKEND_URL}/api/dictate`, {
-      method: 'POST',
-      body: formData,
-    })
+  const response = await fetch(`${BACKEND_URL}/api/dictate`, {
+    method: 'POST',
+    body: formData,
+  })
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Unknown error' }))
-      throw new Error(error.error || `HTTP ${response.status}`)
-    }
-
-    const result = await response.json()
-    finish(result.text || '')
-  } catch (error: any) {
-    fail?.(error)
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }))
+    throw new Error(error.error || `HTTP ${response.status}`)
   }
+
+  const result = await response.json()
+  return result.text || ''
 }
 
 export function isCurrentlyDictating(): boolean {
@@ -213,10 +204,6 @@ function teardown(): { sampleRate: number; chunks: Float32Array[]; totalSamples:
 
 function cancelCapture(): void {
   teardown()
-  const fail = failRecording
-  finishRecording = null
-  failRecording = null
-  fail?.(new Error('Dictation cancelled'))
 }
 
 async function getSelectedLanguage(): Promise<string> {

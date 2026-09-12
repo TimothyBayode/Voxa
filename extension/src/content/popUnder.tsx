@@ -69,7 +69,7 @@ export function PopUnder({ state, errorMessage, targetRect, targetElement, onDic
             <span className="pop-under-icon listening-dot">
               <span className="pulse-ring"></span>
               <span className="pulse-ring"></span>
-              <span className="mic-icon">🔴</span>
+              <span className="state-dot recording"></span>
             </span>
             <div className="pop-under-text">
               <span className="pop-under-label">Listening...</span>
@@ -80,7 +80,9 @@ export function PopUnder({ state, errorMessage, targetRect, targetElement, onDic
       case 'processing':
         return (
           <div className="pop-under-content">
-            <span className="pop-under-icon processing-icon">✨</span>
+            <span className="pop-under-icon">
+              <span className="state-dot transcribing"></span>
+            </span>
             <div className="pop-under-text">
               <span className="pop-under-label">Transcribing...</span>
             </div>
@@ -89,7 +91,9 @@ export function PopUnder({ state, errorMessage, targetRect, targetElement, onDic
       case 'success':
         return (
           <div className="pop-under-content">
-            <span className="pop-under-icon success-icon">✓</span>
+            <span className="pop-under-icon">
+              <span className="state-dot success"></span>
+            </span>
             <div className="pop-under-text">
               <span className="pop-under-label">Added to field</span>
             </div>

@@ -4,7 +4,7 @@ import { PopUnder } from './popUnder'
 import { setupFocusDetection } from './focusDetection'
 import { getActiveEditableElement, isVoxaEnabled } from './utils'
 import { captureSelection, insertTextAtCursor, type TextSelection } from './textInsertion'
-import { startDictation, stopDictation as stopRecording } from './recorder'
+import { startRecording, stopRecording } from './recorder'
 import type { PopUnderState } from '../components/types'
 
 const POP_UNDER_CSS = `
@@ -33,11 +33,12 @@ const POP_UNDER_CSS = `
 }
 
 .pop-under-icon {
-  font-size: 16px;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   width: 24px;
-  text-align: center;
+  align-self: stretch;
 }
 
 .pop-under-logo {
@@ -47,6 +48,45 @@ const POP_UNDER_CSS = `
   margin: 0 auto;
   border-radius: 6px;
   object-fit: cover;
+}
+
+.state-dot {
+  position: relative;
+  z-index: 1;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: block;
+}
+
+.state-dot.recording {
+  background: #ef4444;
+}
+
+.state-dot.transcribing {
+  background: #3b82f6;
+  animation: dot-pulse 1.2s ease-in-out infinite;
+}
+
+.state-dot.success {
+  background: #10b981;
+}
+
+@keyframes dot-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.72);
+    opacity: 0.55;
+  }
+}
+
+.error-icon {
+  color: #ef4444;
+  font-weight: bold;
+  font-size: 14px;
 }
 
 .pop-under-text {
@@ -103,34 +143,6 @@ const POP_UNDER_CSS = `
     transform: scale(1.4);
     opacity: 0;
   }
-}
-
-.mic-icon {
-  position: relative;
-  z-index: 1;
-  font-size: 14px;
-  line-height: 1;
-}
-
-.processing-icon {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.success-icon {
-  color: #10b981;
-  font-weight: bold;
-  font-size: 14px;
-}
-
-.error-icon {
-  color: #ef4444;
-  font-weight: bold;
-  font-size: 14px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -228,7 +240,7 @@ function renderPopUnder() {
       targetElement: dictationState.targetElement,
       onDictationAction: async () => {
         if (dictationState.state === 'listening') {
-          await stopDictation()
+          await stopDictationFlow()
         } else if (dictationState.state === 'idle') {
           await startDictationFlow()
         }
@@ -241,7 +253,7 @@ async function startDictationFlow(forceTarget?: Element) {
   if (!(await isVoxaEnabled())) return
 
   if (dictationState.state === 'listening') {
-    await stopDictation()
+    await stopDictationFlow()
     return
   }
 
@@ -256,19 +268,34 @@ async function startDictationFlow(forceTarget?: Element) {
   renderPopUnder()
 
   try {
-    const transcript = await startDictation()
+    await startRecording(() => {
+      if (dictationState.state === 'listening') {
+        void stopDictationFlow()
+      }
+    })
+  } catch (error: any) {
+    showDictationError(error)
+  }
+}
 
-    dictationState.state = 'processing'
-    renderPopUnder()
+async function stopDictationFlow() {
+  // Show the transcribing state immediately — the upload + transcription happen next
+  dictationState.state = 'processing'
+  dictationState.errorMessage = ''
+  renderPopUnder()
+
+  try {
+    const transcript = await stopRecording()
 
     if (transcript) {
-      if (dictationState.targetElement) {
-        (dictationState.targetElement as HTMLElement).focus()
-      }
+      const targetElement = dictationState.targetElement
+      if (!targetElement) throw new Error('Could not insert text')
+
+      ;(targetElement as HTMLElement).focus()
 
       await new Promise(resolve => setTimeout(resolve, 50))
 
-      const inserted = insertTextAtCursor(transcript, dictationState.targetElement, dictationState.selection)
+      const inserted = insertTextAtCursor(transcript, targetElement, dictationState.selection)
 
       if (inserted) {
         dictationState.state = 'success'
@@ -286,23 +313,23 @@ async function startDictationFlow(forceTarget?: Element) {
       throw new Error('No speech detected')
     }
   } catch (error: any) {
-    console.error('Dictation error:', error)
-    dictationState.state = 'error'
-    dictationState.errorMessage = getErrorMessage(error)
-    renderPopUnder()
-
-    setTimeout(() => {
-      dictationState.state = 'hidden'
-      dictationState.targetElement = null
-      dictationState.selection = null
-      dictationState.errorMessage = ''
-      renderPopUnder()
-    }, 2500)
+    showDictationError(error)
   }
 }
 
-async function stopDictation() {
-  stopRecording()
+function showDictationError(error: any) {
+  console.error('Dictation error:', error)
+  dictationState.state = 'error'
+  dictationState.errorMessage = getErrorMessage(error)
+  renderPopUnder()
+
+  setTimeout(() => {
+    dictationState.state = 'hidden'
+    dictationState.targetElement = null
+    dictationState.selection = null
+    dictationState.errorMessage = ''
+    renderPopUnder()
+  }, 2500)
 }
 
 function getErrorMessage(error: any): string {
@@ -345,7 +372,7 @@ async function init() {
     event.stopPropagation()
 
     if (dictationState.state === 'listening') {
-      void stopDictation()
+      void stopDictationFlow()
     } else {
       void startDictationFlow(active || undefined)
     }

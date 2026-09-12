@@ -352,9 +352,9 @@ If Voxa saves you typing, here are two ways to keep the project going:
 
 If Voxa has been useful to you, a one-time contribution is a simple way to say thanks and help cover running costs:
 
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support%20Voxa-FFDD00?style=flat-square&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/timothybayode)
+<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="timothybayode" data-color="#FFDD00" data-emoji=""  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
 
-[![GitHub Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-sponsor%20Voxa-EA4AAA?style=flat-square&logo=github&logoColor=white)](https://github.com/sponsors/TimothyBayode)
+<iframe src="https://github.com/sponsors/TimothyBayode/button" title="Sponsor TimothyBayode" height="32" width="114" style="border: 0; border-radius: 6px;"></iframe>
 
 Every contribution, big or small, helps keep Voxa independent and ad-free. Thank you for your support!
 

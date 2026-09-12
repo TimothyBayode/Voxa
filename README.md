@@ -121,6 +121,30 @@ npm run dev
 
 ---
 
+## Development
+
+### Run Backend
+
+```bash
+npm run dev:backend
+```
+
+### Run Extension (watch mode)
+
+```bash
+npm run dev:extension
+```
+
+### Run Both
+
+```bash
+npm run dev
+```
+
+---
+
+---
+
 ## Usage
 
 1. Focus any text input, textarea, or contenteditable element on a webpage

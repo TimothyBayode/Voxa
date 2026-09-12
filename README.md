@@ -2,158 +2,79 @@
 
 **Turn every text box into a microphone.**
 
-Voxa is a Chrome extension that brings voice dictation to every text input on the web. Focus any text field and press `Alt + Shift + D` to start dictating with AssemblyAI's real-time transcription API.
+## What is Voxa?
+
+Voxa is a free Chrome extension that lets you type with your voice — on any website.
+
+Click into any text box (email, chat, forms, comments — anywhere you can type), tell Voxa to listen, speak naturally, and your words appear as text. You can even pick an output language: speak English and have Portuguese, French, Japanese (or any of 80+ languages) inserted instead.
+
+No accounts. No sign-ups. No configuration. Download, load into Chrome, and dictate.
 
 ---
 
 ## Features
 
-- Dictate into any text input, textarea, or contenteditable element
-- Real-time transcription via AssemblyAI Dictation API
+- Dictate into any text input, textarea, or rich text editor on the web
+- Real-time transcription powered by AssemblyAI
+- Translate your speech into 80+ languages
 - Minimal, unobtrusive pop-under UI
 - Keyboard shortcut: `Alt + Shift + D`
-- Works with modern JavaScript applications (React, Vue, etc.)
-- Lightweight and privacy-focused
+- Works with modern web apps (Gmail, ChatGPT, Notion, and more)
 
 ---
 
-## Architecture
+## Installation
 
-```text
-User speaks
-    ↓
-Chrome Extension (content script)
-    ↓
-Voxa Backend (Express + AssemblyAI)
-    ↓
-AssemblyAI Dictation API
-    ↓
-Transcript returned
-    ↓
-Inserted into focused text field
-```
+You only need **Google Chrome** and the **Voxa ZIP file**.
 
-**The AssemblyAI API key never leaves the backend.**
+1. **Download** the Voxa ZIP file (from your hackathon submission or the [Releases](https://github.com/TimothyBayode/Voxa/releases) page).
+2. **Extract** the ZIP file — right-click it and choose *Extract All* (Windows) or double-click it (Mac). Remember where you saved it.
+3. **Open Google Chrome**.
+4. In the address bar, type `chrome://extensions` and press **Enter**.
+5. Turn on **Developer mode** — the toggle in the top-right corner of that page.
+6. Click the **Load unpacked** button that appears at the top-left.
+7. Select the **extracted Voxa folder** — the one that directly contains the file `manifest.json`.
+8. Voxa now appears in your list of extensions. Click the **puzzle-piece icon** in Chrome's toolbar and **pin Voxa** for quick access.
+9. **Open any website** you like.
+10. **Click inside a text field**.
+11. **Use Voxa** — see the next section.
 
----
-
-## Tech Stack
-
-- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS
-- **Extension**: Chrome Manifest V3, Service Worker
-- **Backend**: Node.js, Express, AssemblyAI SDK, WebSocket
-- **Audio**: MediaRecorder API (browser)
+> Chrome may show a "Developer mode extensions" notice — this is normal for extensions installed outside the Chrome Web Store and is safe to dismiss.
 
 ---
 
-## Prerequisites
+## Using Voxa
 
-- Node.js >= 18
-- npm >= 9
-- Chrome browser
-- AssemblyAI API key
+1. Click inside any text box on any website.
+2. A small Voxa pop-under appears just below the field — **click it**, or press `Alt + Shift + D`.
+3. The first time, Chrome asks for microphone access — click **Allow**.
+4. Speak naturally. You'll see a red pulsing dot while Voxa listens.
+5. Click the pop-under again (or press `Alt + Shift + D`) to stop.
+6. Your words appear in the text field as text. Done!
 
----
-
-## Setup
-
-### 1. Clone and Install
-
-```bash
-git clone <repo-url>
-cd voxa
-npm install
-```
-
-### 2. Configure Backend
-
-```bash
-cp backend/.env.example backend/.env
-```
-
-Edit `backend/.env`:
-
-```env
-ASSEMBLYAI_API_KEY=your_assemblyai_api_key_here
-PORT=3000
-CORS_ORIGIN=chrome-extension://*
-```
-
-### 3. Build Extension
-
-```bash
-npm run build
-```
-
-This produces `extension/dist/` which can be loaded as an unpacked extension.
+**Choosing an output language:** click the Voxa icon in the toolbar to open the popup. Turn Voxa on or off, and pick an output language — for example, choose *Portuguese*, speak English, and Portuguese text is inserted.
 
 ---
 
-## Development
+## Troubleshooting
 
-### Run Backend
+**Chrome says Developer mode is required**
+That's expected. Voxa is installed outside the Chrome Web Store, so Chrome asks you to enable Developer mode — the toggle in the top-right of `chrome://extensions`. Leave it on.
 
-```bash
-npm run dev:backend
-```
+**Voxa does not appear after installation**
+Make sure you selected the folder that *directly* contains `manifest.json` (open the extracted ZIP folder first — don't select the ZIP itself). Then go to `chrome://extensions`, find Voxa, and click the **reload** (circular arrow) icon. Restarting Chrome also helps.
 
-### Run Extension (watch mode)
+**Voxa does not appear on a particular page**
+Refresh the page after installing Voxa. Voxa appears on pages with standard text boxes; a few sites use highly custom editors where the pop-under may not show — try the keyboard shortcut `Alt + Shift + D` while clicked into the field.
 
-```bash
-npm run dev:extension
-```
+**Microphone permission is denied**
+Click the icon on the left of the website's address bar → *Site settings* → set **Microphone** to *Allow* → reload the page. You can also check permissions at `chrome://settings/content/microphone`.
 
-### Run Both
+**Voxa stopped working or feels stuck**
+Try these in order: wait a few seconds and try again → toggle Voxa off and on in the popup → reload the page → reload the extension at `chrome://extensions` (circular arrow icon).
 
-```bash
-npm run dev
-```
-
----
-
-## Chrome Installation
-
-1. Open Chrome and navigate to `chrome://extensions`
-2. Enable **Developer mode** (top right)
-3. Click **Load unpacked**
-4. Select the `extension/dist` folder
-5. Pin Voxa to your toolbar
-
----
-
-## Development
-
-### Run Backend
-
-```bash
-npm run dev:backend
-```
-
-### Run Extension (watch mode)
-
-```bash
-npm run dev:extension
-```
-
-### Run Both
-
-```bash
-npm run dev
-```
-
----
-
----
-
-## Usage
-
-1. Focus any text input, textarea, or contenteditable element on a webpage
-2. A small "Dictate with Voxa" pop-under appears below the field
-3. Press `Alt + Shift + D` (or click the pop-under)
-4. Allow microphone access when prompted (first time only)
-5. Speak naturally
-6. Press `Alt + Shift + D` again to stop
-7. Your transcript appears in the text field
+**"Voxa is temporarily unavailable"**
+Check your internet connection and try again in a moment — Voxa needs to reach its transcription service.
 
 ---
 
@@ -176,7 +97,7 @@ Voxa does not read your browsing history, does not analyze page content, and doe
 
 ### How transcription works
 
-When you dictate, the captured audio is sent to the Voxa backend associated with your installation, which forwards it to the [AssemblyAI](https://www.assemblyai.com/) Dictation API for speech-to-text processing. If you select an output language other than English, the returned transcript is rewritten into that language as part of the same request. The transcript is then inserted into the text field you dictated into:
+When you dictate, the captured audio is sent to Voxa's transcription backend, which forwards it to the [AssemblyAI](https://www.assemblyai.com/) Dictation API for speech-to-text processing. If you select an output language other than English, the returned transcript is rewritten into that language as part of the same request. The transcript is then inserted into the text field you dictated into:
 
 ```text
 User speaks
@@ -190,9 +111,7 @@ Transcript returned
 Transcript inserted into focused field
 ```
 
-Because transcription is performed by AssemblyAI, **your spoken content is processed by third-party infrastructure** that Voxa depends on to provide the service. AssemblyAI's handling of that data is governed by AssemblyAI's own terms and privacy policy, not by Voxa.
-
-Voxa is self-hosted by design: the backend is your own instance, running on your own machine or server, with your own AssemblyAI API key. If you point Voxa at a backend operated by someone else, that operator's practices apply to the audio sent to it.
+Because transcription is performed by AssemblyAI, **your spoken content is processed by third-party infrastructure** that Voxa depends on to provide the service. AssemblyAI's handling of that data is governed by AssemblyAI's own terms and privacy policy, not by Voxa. Voxa's backend is hosted on Render and operated by the Voxa developer.
 
 ### What Voxa does not do
 
@@ -208,7 +127,7 @@ Voxa stores two settings in your browser's local extension storage (`chrome.stor
 
 ### API keys and configuration
 
-The AssemblyAI API key used for transcription is configured server-side in the backend's environment (`.env`). It is never embedded in the extension, never sent to your browser, and never included in requests from the extension. No other credentials or configuration data are handled.
+The AssemblyAI API key used for transcription lives only on the Voxa backend. It is never embedded in the extension, never sent to your browser, and never included in requests from the extension. No other credentials or configuration data are handled.
 
 ### Data retention and deletion
 
@@ -225,7 +144,7 @@ The AssemblyAI API key used for transcription is configured server-side in the b
 
 ### Security limitations
 
-Voxa is provided as-is under the MIT license. The default backend setup listens on `http://localhost:3000`, which keeps traffic on your machine; if you expose a backend on a network, secure it appropriately (HTTPS, access controls) — the security of that deployment is the operator's responsibility. Note that audio does leave your device during dictation, so avoid dictating highly sensitive information (passwords, financial details, health data) unless you are comfortable with the processing described above.
+Voxa is provided as-is under the MIT license. Communication with the transcription backend happens over HTTPS, but audio does leave your device during dictation, so avoid dictating highly sensitive information (passwords, financial details, health data) unless you are comfortable with the processing described above.
 
 ### Children's privacy
 
@@ -238,131 +157,6 @@ This policy may be updated as Voxa evolves. Changes are published in this file, 
 ### Contact
 
 Questions or concerns about privacy? Open an issue at [github.com/TimothyBayode/Voxa/issues](https://github.com/TimothyBayode/Voxa/issues).
-
----
-
-## Permissions
-
-| Permission | Why |
-|------------|-----|
-| `storage` | Persist user settings (language, enabled/disabled) |
-| `activeTab` | Communicate with the current tab's content script |
-| `host_permissions: <all_urls>` | Detect editable elements on any webpage |
-
----
-
-## API Endpoints
-
-### `GET /health`
-
-Returns backend health status.
-
-```json
-{
-  "ok": true,
-  "service": "voxa-backend"
-}
-```
-
-### `POST /api/dictate`
-
-Receives audio file and returns transcription.
-
-**Request**: `multipart/form-data` with `audio` field (webm/opus)
-
-**Response**:
-
-```json
-{
-  "text": "This is the transcribed text."
-}
-```
-
----
-
-## Supported Websites
-
-Voxa works on:
-
-- Basic HTML pages with `<input>` and `<textarea>`
-- ChatGPT and other AI chat interfaces
-- Gmail and other email composers
-- GitHub and developer tools
-- Any website with standard editable elements
-
-Third-party websites with custom editor implementations are supported on a best-effort basis.
-
----
-
-## Error Handling
-
-| Error | User Message |
-|-------|--------------|
-| Microphone denied | "Microphone access is required to dictate." |
-| No speech detected | "No speech detected. Try again." |
-| AssemblyAI error | "Voxa couldn't transcribe that. Try again." |
-| Backend unavailable | "Voxa is temporarily unavailable." |
-
----
-
-## Project Structure
-
-```
-voxa/
-├── backend/
-│   ├── src/
-│   │   ├── server.ts
-│   │   ├── routes/
-│   │   └── services/
-│   ├── .env.example
-│   ├── package.json
-│   └── tsconfig.json
-├── extension/
-│   ├── src/
-│   │   ├── content/
-│   │   │   ├── content.tsx
-│   │   │   ├── popUnder.tsx
-│   │   │   ├── recorder.ts
-│   │   │   ├── textInsertion.ts
-│   │   │   ├── focusDetection.ts
-│   │   │   └── utils.ts
-│   │   ├── popup/
-│   │   │   ├── popup.tsx
-│   │   │   └── popup.css
-│   │   └── background/
-│   │       └── serviceWorker.ts
-│   ├── public/
-│   │   ├── manifest.json
-│   │   └── icons/
-│   ├── dist/                    # Built extension (load this)
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── vite.config.ts
-│   └── vite.content.config.ts
-├── package.json
-└── README.md
-```
-
----
-
-## Troubleshooting
-
-### Backend won't start
-
-- Ensure `ASSEMBLYAI_API_KEY` is set in `backend/.env`
-- Check that port 3000 is not in use
-
-### Extension won't load
-
-- Ensure `npm run build` has been run in the `extension/` directory
-- Verify `manifest.json` exists in `extension/dist/`
-- Check Chrome console for errors at `chrome://extensions`
-
-### Dictation doesn't work
-
-- Ensure the backend is running on port 3000
-- Check that microphone permissions are granted
-- Verify the AssemblyAI API key is valid
 
 ---
 
@@ -384,3 +178,15 @@ Every contribution, big or small, helps keep Voxa independent and ad-free. Thank
 ## License
 
 MIT
+
+---
+
+## For Developers
+
+Want to run Voxa locally, deploy your own backend, or contribute to the codebase? All technical documentation — architecture, setup, development commands, and deployment — lives in [DEVELOPMENT.md](DEVELOPMENT.md).
+
+Users don't need any of this: the extension works out of the box because the backend is already hosted and running.
+
+---
+
+Technical documentation for contributors (architecture, backend setup, deployment, API reference) lives in [DEVELOPMENT.md](DEVELOPMENT.md).

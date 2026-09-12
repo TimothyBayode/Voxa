@@ -1,4 +1,4 @@
-const BACKEND_URL = 'http://localhost:3000'
+const BACKEND_URL = 'https://voxa-vzrg.onrender.com'
 const TARGET_SAMPLE_RATE = 16000
 const MAX_RECORDING_MS = 115_000
 const MIN_SAMPLES = 4000

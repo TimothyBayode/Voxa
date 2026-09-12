@@ -1,12 +1,6 @@
 "use strict";
 (() => {
   // src/background/serviceWorker.ts
-  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-    if (message.action === "ping") {
-      sendResponse({ ok: true });
-    }
-    return true;
-  });
   async function isEnabled() {
     const result = await chrome.storage.local.get({ voxaEnabled: true });
     return result.voxaEnabled === true;

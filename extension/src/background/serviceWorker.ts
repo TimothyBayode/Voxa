@@ -1,10 +1,3 @@
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message.action === 'ping') {
-    sendResponse({ ok: true })
-  }
-  return true
-})
-
 async function isEnabled(): Promise<boolean> {
   const result = await chrome.storage.local.get({ voxaEnabled: true })
   return result.voxaEnabled === true

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import type { PopUnderState } from '../components/types'
 import voxaLogoUrl from '../assets/logo.png'
 
@@ -12,7 +12,6 @@ interface PopUnderProps {
 
 export function PopUnder({ state, errorMessage, targetRect, targetElement, onDictationAction }: PopUnderProps) {
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
-  const popRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!targetRect || !targetElement) return
@@ -115,7 +114,6 @@ export function PopUnder({ state, errorMessage, targetRect, targetElement, onDic
 
   return (
     <div
-      ref={popRef}
       className="pop-under"
       role="button"
       tabIndex={0}

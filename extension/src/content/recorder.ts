@@ -123,10 +123,6 @@ export async function stopRecording(): Promise<string> {
   return result.text || ''
 }
 
-export function isCurrentlyDictating(): boolean {
-  return currentContext !== null
-}
-
 async function createCaptureNode(context: AudioContext): Promise<AudioWorkletNode | ScriptProcessorNode> {
   try {
     const blobUrl = URL.createObjectURL(new Blob([CAPTURE_WORKLET_CODE], { type: 'application/javascript' }))

@@ -354,12 +354,7 @@ If Voxa has been useful to you, a one-time contribution is a simple way to say t
 
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support%20Voxa-FFDD00?style=flat-square&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/timothybayode)
 
-### GitHub Sponsors
-
-If you'd like to back Voxa's ongoing development through GitHub, you can sponsor the project here:
-
-<!-- TODO: replace YOUR_USERNAME with the maintainer's GitHub Sponsors profile once enabled -->
-[![GitHub Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-sponsor%20Voxa-EA4AAA?style=flat-square&logo=github&logoColor=white)](https://github.com/sponsors/YOUR_USERNAME)
+[![GitHub Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-sponsor%20Voxa-EA4AAA?style=flat-square&logo=github&logoColor=white)](https://github.com/sponsors/TimothyBayode)
 
 Every contribution, big or small, helps keep Voxa independent and ad-free. Thank you for your support!
 

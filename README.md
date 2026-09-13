@@ -167,7 +167,6 @@ Voxa is an open-source project, built and maintained in spare time. Sponsorships
 If Voxa saves you typing, here are two ways to keep the project going — a one-time coffee, or ongoing sponsorship through GitHub:
 
 <p>
-  <a href="https://buymeacoffee.com/timothybayode" target="_blank" rel="noopener"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="32"></a>&nbsp;&nbsp;
   <a href="https://github.com/sponsors/TimothyBayode" target="_blank" rel="noopener"><img src="https://img.shields.io/badge/Sponsor-EA4AAA?style=flat-square&logo=githubsponsors&logoColor=white" alt="Sponsor TimothyBayode" height="32"></a>
 </p>
 
